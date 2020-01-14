@@ -114,7 +114,7 @@ void ICP::matchPoints(const Pointcloud& points, const size_t start_idx,
   src->resize(3, config_.mini_batch_size);
   tgt->resize(3, config_.mini_batch_size);
 
-  // epsilon to ensure we can always divide by it
+  // epsilon 保证除数永不为0
   info_vector->setConstant(kEpsilon);
 
   size_t idx = 0;
@@ -231,7 +231,7 @@ size_t ICP::runICP(const Layer<TsdfVoxel>& tsdf_layer, const Pointcloud& points,
 
   Pointcloud shuffled_points = points;
 
-  // randomize point order
+  // 打乱点云中的点
   std::shuffle(shuffled_points.begin(), shuffled_points.end(),
                std::default_random_engine(seed));
 
@@ -245,6 +245,7 @@ size_t ICP::runICP(const Layer<TsdfVoxel>& tsdf_layer, const Pointcloud& points,
   atomic_idx_.store(0);
   size_t num_updates = 0;
 
+  // 多线程加速ICP
   for (size_t i = 0; i < config_.num_threads; ++i) {
     threads.emplace_back(&ICP::runThread, this, shuffled_points,
                          refined_T_tsdf_sensor, &base_info_vector,

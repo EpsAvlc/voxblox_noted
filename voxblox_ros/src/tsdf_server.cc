@@ -199,8 +199,9 @@ void TsdfServer::processPointCloudMessageAndInsert(
     const sensor_msgs::PointCloud2::Ptr& pointcloud_msg,
     const Transformation& T_G_C, const bool is_freespace_pointcloud) {
   // Convert the PCL pointcloud into our awesome format.
+  // 将PCL点云转化为我们的超赞的格式（笑）。
 
-  // Horrible hack fix to fix color parsing colors in PCL.
+  // 如果是彩色点云（Pointcloud with rgb），将彩色分量的数据类型设置为32位浮点型
   bool color_pointcloud = false;
   for (size_t d = 0; d < pointcloud_msg->fields.size(); ++d) {
     if (pointcloud_msg->fields[d].name == std::string("rgb")) {
@@ -209,14 +210,14 @@ void TsdfServer::processPointCloudMessageAndInsert(
     }
   }
 
+  // Pointcloud 类型与Colors类型均为Eigen内存分配对齐的std::vector
   Pointcloud points_C;
   Colors colors;
   timing::Timer ptcloud_timer("ptcloud_preprocess");
 
-  // Convert differently depending on RGB or I type.
+  // 根据是否是彩色点云作相应的转换
   if (color_pointcloud) {
     pcl::PointCloud<pcl::PointXYZRGB> pointcloud_pcl;
-    // pointcloud_pcl is modified below:
     pcl::fromROSMsg(*pointcloud_msg, pointcloud_pcl);
     points_C.reserve(pointcloud_pcl.size());
     colors.reserve(pointcloud_pcl.size());
@@ -248,6 +249,7 @@ void TsdfServer::processPointCloudMessageAndInsert(
       points_C.push_back(Point(pointcloud_pcl.points[i].x,
                                pointcloud_pcl.points[i].y,
                                pointcloud_pcl.points[i].z));
+      // 将激光雷达的点的强度值映射为颜色。
       colors.push_back(
           color_map_->colorLookup(pointcloud_pcl.points[i].intensity));
     }
@@ -255,12 +257,15 @@ void TsdfServer::processPointCloudMessageAndInsert(
   ptcloud_timer.Stop();
 
   Transformation T_G_C_refined = T_G_C;
+  // 用ICP来更新世界坐标系到相机坐标系的距离
   if (enable_icp_) {
     timing::Timer icp_timer("icp");
+    // 是否将ICP矫正量累加
     if (!accumulate_icp_corrections_) {
       icp_corrected_transform_.setIdentity();
     }
     static Transformation T_offset;
+    // 用TSDF做ICP优化获得位姿
     const size_t num_icp_updates =
         icp_->runICP(tsdf_map_->getTsdfLayer(), points_C,
                      icp_corrected_transform_ * T_G_C, &T_G_C_refined);
@@ -326,7 +331,7 @@ void TsdfServer::processPointCloudMessageAndInsert(
   newPoseCallback(T_G_C);
 }
 
-// Checks if we can get the next message from queue.
+// 检查是否能从队列中获取上一帧点云
 bool TsdfServer::getNextPointcloudFromQueue(
     std::queue<sensor_msgs::PointCloud2::Ptr>* queue,
     sensor_msgs::PointCloud2::Ptr* pointcloud_msg, Transformation* T_G_C) {
@@ -335,6 +340,7 @@ bool TsdfServer::getNextPointcloudFromQueue(
     return false;
   }
   *pointcloud_msg = queue->front();
+  // 查找世界坐标与相机坐标系的Transform
   if (transformer_.lookupTransform((*pointcloud_msg)->header.frame_id,
                                    world_frame_,
                                    (*pointcloud_msg)->header.stamp, T_G_C)) {
@@ -354,8 +360,10 @@ bool TsdfServer::getNextPointcloudFromQueue(
   return false;
 }
 
+// TSDF 主要的Callback
 void TsdfServer::insertPointcloud(
     const sensor_msgs::PointCloud2::Ptr& pointcloud_msg_in) {
+  // 如果两帧点云之间的时间间隔相差太大，则将当前帧塞进队列。
   if (pointcloud_msg_in->header.stamp - last_msg_time_ptcloud_ >
       min_time_between_msgs_) {
     last_msg_time_ptcloud_ = pointcloud_msg_in->header.stamp;
@@ -363,11 +371,13 @@ void TsdfServer::insertPointcloud(
     pointcloud_queue_.push(pointcloud_msg_in);
   }
 
+  // T_G_C ground to camera 世界坐标与相机坐标系的Transform
   Transformation T_G_C;
   sensor_msgs::PointCloud2::Ptr pointcloud_msg;
   bool processed_any = false;
-  while (
-      getNextPointcloudFromQueue(&pointcloud_queue_, &pointcloud_msg, &T_G_C)) {
+  while (getNextPointcloudFromQueue(&pointcloud_queue_, &pointcloud_msg, &T_G_C)) 
+  {
+    // constexpr 常量表达式 用于定义bool型的常量
     constexpr bool is_freespace_pointcloud = false;
     processPointCloudMessageAndInsert(pointcloud_msg, T_G_C,
                                       is_freespace_pointcloud);

@@ -16,8 +16,10 @@ bool Interpolator<VoxelType>::getDistance(const Point& pos,
                                           FloatingPoint* distance,
                                           bool interpolate) const {
   if (interpolate) {
+    // 获得插值的距离
     return getInterpDistance(pos, distance);
   } else {
+    // 获得最近邻的距离
     return getNearestDistance(pos, distance);
   }
 }
@@ -44,8 +46,7 @@ bool Interpolator<VoxelType>::getGradient(const Point& pos, Point* grad,
   }
   // Now get the gradient.
   *grad = Point::Zero();
-  // Iterate over all 3 D, and over negative and positive signs in central
-  // difference.
+  // 计算三个维度的梯度值
   for (unsigned int i = 0u; i < 3u; ++i) {
     for (int sign = -1; sign <= 1; sign += 2) {
       Point offset = Point::Zero();
@@ -57,7 +58,7 @@ bool Interpolator<VoxelType>::getGradient(const Point& pos, Point* grad,
       (*grad)(i) += offset_distance * static_cast<FloatingPoint>(sign);
     }
   }
-  // Scale by correct size.
+  // 将梯度值缩放至正确大小
   // This is central difference, so it's 2x voxel size between measurements.
   *grad /= (2 * block_ptr->voxel_size());
   return true;
@@ -276,7 +277,7 @@ bool Interpolator<VoxelType>::getInterpDistance(const Point& pos,
                                                 FloatingPoint* distance) const {
   CHECK_NOTNULL(distance);
 
-  // get distances of 8 surrounding voxels and weights vector
+  // 用距离最近的八个栅格来插值
   const VoxelType* voxels[8];
   InterpVector q_vector;
   if (!getVoxelsAndQVector(pos, voxels, &q_vector)) {

@@ -77,10 +77,9 @@ class ICP {
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     bool refine_roll_pitch = false;
     /**
-     *  Number of points used in each alignment step. To allow simple threading
-     *   the ICP process is split up into a large number of separate alignments
-     *  performed on small pointclouds. This parameter dictates how many points
-     *  are used in each "mini batch". The result are then combined weighting
+     *  每次icp对齐时使用的点的数量。为了能够多线程加速，整个ICP过程被分成了许多
+     * 小的线程来分别对齐。这个参数揭示了每次做小的线程对齐过程中用的点的数量。
+     *  The result are then combined weighting
      *  them by an estimate of the information gained by the alignment.
      */
     int mini_batch_size = 20;
@@ -183,6 +182,8 @@ class ICP {
                                             Transformation* T_tsdf_sensor);
 
   /**
+   * 一种能够较模糊地定量的计算某个点对于ICP对齐的作用的方式。结果可以看做是Hessian
+   * 矩阵的一种近似。
    * A measure that vaguely indicates the amount of information a point
    *  contributes to the alignment estimate. The result can be taken as an
    * approximation of the Hessian, "Normalized" as the uncertainty in the points
@@ -197,13 +198,13 @@ class ICP {
                                      const Point& normalized_point_normal,
                                      Vector6* info_vector);
 
-  /// Generates a set of matching points from a pointcloud and tsdf layer.
+  /// 根据点云与TSDF层生成对应的匹配点对
   void matchPoints(const Pointcloud& points, const size_t start_idx,
                    const Transformation& T_tsdf_sensor, PointsMatrix* src,
                    PointsMatrix* tgt, Vector6* info_vector);
 
   /**
-   * Performs one mini batch step and gives the refined transform.
+   * 执行小部分的ICP并返回相应的Transform
    * @return true if a valid transform was generated
    */
   bool stepICP(const Pointcloud& points, const size_t start_idx,
@@ -211,8 +212,7 @@ class ICP {
                Transformation* refined_T_tsdf_sensor, Vector6* info_vector);
 
   /**
-   * A thread safe function that will continually process points until the
-   * alignment is finished. Called by runICP.
+   * 线程安全的ICP函数，可以持续处理直到点云对齐。被runICP函数调用。
    */
   void runThread(const Pointcloud& points,
                  Transformation* current_T_tsdf_sensor,

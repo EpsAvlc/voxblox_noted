@@ -145,10 +145,8 @@ constexpr float kFloatEpsilon = 1e-6;    /**< Used for weights. */
 // Grid <-> point conversion functions.
 
 /**
- * NOTE: Due the limited accuracy of the FloatingPoint type, this
- * function doesn't always compute the correct grid index for coordinates
- * near the grid cell boundaries. Use the safer `getGridIndexFromOriginPoint` if
- * the origin point is available.
+ * 注意： 由于浮点型的精度问题，这个函数不总是能够返回正确的栅格序号
+ * 如果原点已知， 使用更安全的 `getGridIndexFromOriginPoint`
  */
 template <typename IndexType>
 inline IndexType getGridIndexFromPoint(const Point& point,

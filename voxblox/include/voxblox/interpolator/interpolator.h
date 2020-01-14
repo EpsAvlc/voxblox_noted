@@ -10,7 +10,7 @@
 namespace voxblox {
 
 /**
- * Interpolates voxels to give distances and gradients
+ * 对voxels进行插值来获得距离与梯度
  */
 template <typename VoxelType>
 class Interpolator {
