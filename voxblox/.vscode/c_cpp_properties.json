@@ -1,0 +1,27 @@
+{
+    "configurations": [
+        {
+            "browse": {
+                "databaseFilename": "",
+                "limitSymbolsToIncludedHeaders": true
+            },
+            "includePath": [
+                "/home/cm/Workspaces/multirobot_ws/devel/include",
+                "/opt/ros/kinetic/include",
+                "/home/cm/Workspaces/multirobot_ws/src/eigen_checks/include",
+                "/home/cm/Workspaces/multirobot_ws/src/minkindr/minkindr/include",
+                "/home/cm/Workspaces/multirobot_ws/src/minkindr_ros/minkindr_conversions/include",
+                "/home/cm/Workspaces/multirobot_ws/src/multi_robot_exploration/include",
+                "/home/cm/Workspaces/multirobot_ws/src/voxblox/voxblox/include",
+                "/home/cm/Workspaces/multirobot_ws/src/voxblox/voxblox_ros/include",
+                "/home/cm/Workspaces/multirobot_ws/src/voxblox/voxblox_rviz_plugin/include",
+                "/usr/include"
+            ],
+            "name": "Linux",
+            "intelliSenseMode": "gcc-x64",
+            "compilerPath": "/usr/bin/clang",
+            "cStandard": "c11"
+        }
+    ],
+    "version": 4
+}
