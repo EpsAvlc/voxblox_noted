@@ -208,8 +208,8 @@ void TsdfIntegratorBase::updateTsdfVoxel(const Point& origin,
   tsdf_voxel->weight = std::min(config_.max_weight, new_weight);
 }
 
-// Thread safe.
-// Figure out whether the voxel is behind or in front of the surface.
+// 线程安全
+// 确认这个voxel是在某个表面前还是表面后
 // To do this, project the voxel_center onto the ray from origin to point G.
 // Then check if the the magnitude of the vector is smaller or greater than
 // the original distance...
@@ -281,6 +281,7 @@ void SimpleTsdfIntegrator::integrateFunction(const Transformation& T_G_C,
     }
 
     const Point origin = T_G_C.getPosition();
+    // 将深度点转换为世界坐标系下
     const Point point_G = T_G_C * point_C;
 
     RayCaster ray_caster(origin, point_G, is_clearing,

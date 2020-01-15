@@ -58,6 +58,7 @@ class TsdfIntegratorBase {
 
     float default_truncation_distance = 0.1;
     float max_weight = 10000.0;
+    // 如果设置为true，则使用整个光线的长度；如果设置为false, 则只使用截断的距离内的光线
     bool voxel_carving_enabled = true;
     FloatingPoint min_ray_length_m = 0.1;
     FloatingPoint max_ray_length_m = 5.0;
@@ -110,6 +111,7 @@ class TsdfIntegratorBase {
       return false;
     } else if (ray_distance > config_.max_ray_length_m) {
       if (config_.allow_clear || freespace_point) {
+        // 这个点是clear voxel用的点
         *is_clearing = true;
         return true;
       } else {
@@ -202,6 +204,8 @@ class TsdfIntegratorFactory {
 };
 
 /**
+ *  基本的TSDF integrateor.每个点被用来作光线投射到每个voxel，每个voxel
+ * 分别更新。很慢。
  * Basic TSDF integrator. Every point is raycast through all the voxels, which
  * are updated individually. An exact but very slow approach.
  */

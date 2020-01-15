@@ -16,6 +16,7 @@
 namespace voxblox {
 
 /**
+ * 用于多线程中需要返回对某个数组的不重复的下标。
  * Small class that can be used by multiple threads that need mutually exclusive
  * indexes to the same array, while still covering all elements.
  * The class attempts to ensure that the points are read in an order that gives
@@ -55,6 +56,7 @@ class ThreadSafeIndex {
 };
 
 /**
+ * 对某条光线进行传播时，返回其经过的所有voxel。
  * Generates the indexes of all voxels a given ray will pass through. This class
  * assumes PRE-SCALED coordinates, where one unit = one voxel size. The indices
  * are also returned in this scales coordinate system, which should map to voxel

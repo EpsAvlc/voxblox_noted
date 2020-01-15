@@ -163,6 +163,7 @@ RayCaster::RayCaster(const Point& origin, const Point& point_G,
   const Point start_scaled = ray_start * voxel_size_inv;
   const Point end_scaled = ray_end * voxel_size_inv;
 
+  // 是否从原点开始投射
   if (cast_from_origin) {
     setupRayCaster(start_scaled, end_scaled);
   } else {
@@ -174,7 +175,7 @@ RayCaster::RayCaster(const Point& start_scaled, const Point& end_scaled) {
   setupRayCaster(start_scaled, end_scaled);
 }
 
-// returns false if ray terminates at ray_index, true otherwise
+// 如果光线传播在ray_index处停止了，则返回false。 否则返回true。
 bool RayCaster::nextRayIndex(GlobalIndex* ray_index) {
   if (current_step_++ > ray_length_in_steps_) {
     return false;
@@ -184,7 +185,7 @@ bool RayCaster::nextRayIndex(GlobalIndex* ray_index) {
   *ray_index = curr_index_;
 
   int t_min_idx;
-  t_to_next_boundary_.minCoeff(&t_min_idx);
+  t_to_next_boundary_.minCoeff(&t_min_idx); // Eigen::minCoeff 返回矩阵中数值的最小值及其index
   curr_index_[t_min_idx] += ray_step_signs_[t_min_idx];
   t_to_next_boundary_[t_min_idx] += t_step_size_[t_min_idx];
 
@@ -211,15 +212,18 @@ void RayCaster::setupRayCaster(const Point& start_scaled,
 
   const Ray ray_scaled = end_scaled - start_scaled;
 
+  // 决定在x,y,z方向上 光线投射的方向，由正负号决定。
   ray_step_signs_ = AnyIndex(signum(ray_scaled.x()), signum(ray_scaled.y()),
                              signum(ray_scaled.z()));
 
+  // 光线不能往光心方向投射，只能往前方投射。
   const AnyIndex corrected_step(std::max(0, ray_step_signs_.x()),
                                 std::max(0, ray_step_signs_.y()),
                                 std::max(0, ray_step_signs_.z()));
 
+  // 起点相对于voxel终点的偏移量
   const Point start_scaled_shifted =
-      start_scaled - curr_index_.cast<FloatingPoint>();
+      start_scaled - curr_index_.cast<FloatingPoint>(); // Eigen::cast：将某种数据类型的矩阵转换为另一种类型的矩阵。
 
   Ray distance_to_boundaries(corrected_step.cast<FloatingPoint>() -
                              start_scaled_shifted);
